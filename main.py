@@ -2,14 +2,29 @@ import os
 import requests
 from flask import Flask, request
 
+# Optional official Gemini client (recommended if installed)
+try:
+    import google.generativeai as genai
+except Exception:
+    genai = None
+
 app = Flask(__name__)
 
 # ---- Environment variables (hosting dashboard me set karo) ----
 VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN", "ssc123")       # koi bhi secret word
 WA_TOKEN = os.environ["WA_TOKEN"]                              # Meta WhatsApp access token
 PHONE_NUMBER_ID = os.environ["PHONE_NUMBER_ID"]                # Meta dashboard se
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]                  # aistudio.google.com se free key
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")              # aistudio.google.com se free key
+# Use a supported model name to avoid runtime errors. Recommended: gemini-1.5-flash or gemini-1.5-pro
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+
+# If the google.generativeai package is available, configure it (safe no-op if not installed)
+if genai and GEMINI_API_KEY:
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+    except Exception:
+        # don't fail startup if client configuration fails
+        pass
 
 # ---- Apni coaching ki details yahan bharo ----
 COACHING_INFO = """
@@ -41,6 +56,8 @@ def ask_gemini(user_id, text):
     turns.append({"role": "user", "parts": [{"text": text}]})
     turns[:] = turns[-8:]  # last 8 messages hi rakho
 
+    # Preferred: if the official client is available you can switch to it.
+    # The REST endpoint below continues to work; ensure model name is supported (gemini-1.5-flash / gemini-1.5-pro).
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/models/"
         f"{GEMINI_MODEL}:generateContent"
@@ -49,7 +66,15 @@ def ask_gemini(user_id, text):
         "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
         "contents": turns,
     }
+
     try:
+        # If the official client is installed you may prefer to use it instead of the REST call.
+        # Example (provided by Gemini):
+        # import google.generativeai as genai
+        # genai.configure(api_key=GEMINI_API_KEY)
+        # model = genai.GenerativeModel('gemini-1.5-flash')
+        # response = model.generate(...)
+        # But to keep compatibility without requiring the client, we call the REST endpoint here.
         r = requests.post(url, json=body, headers={"x-goog-api-key": GEMINI_API_KEY}, timeout=30)
         r.raise_for_status()
         reply = r.json()["candidates"][0]["content"]["parts"][0]["text"]
