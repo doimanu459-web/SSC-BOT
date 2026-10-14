@@ -41,16 +41,16 @@ def ask_gemini(user_id, text):
     turns.append({"role": "user", "parts": [{"text": text}]})
     turns[:] = turns[-8:]  # last 8 messages hi rakho
 
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
-    )
+       url = (
+       f"https://generativelanguage.googleapis.com/v1beta/models/"
+       f"{GEMINI_MODEL}:generateContent"
+       )
     body = {
         "system_instruction": {"parts": [{"text": SYSTEM_PROMPT}]},
         "contents": turns,
     }
     try:
-        r = requests.post(url, json=body, timeout=30)
+           r = requests.post(url, json=body, headers={"x-goog-api-key": GEMINI_API_KEY}, timeout=30)
         r.raise_for_status()
         reply = r.json()["candidates"][0]["content"]["parts"][0]["text"]
     except Exception as e:
