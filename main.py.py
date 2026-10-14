@@ -13,11 +13,11 @@ GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
 
 # ---- Apni coaching ki details yahan bharo ----
 COACHING_INFO = """
-Coaching ka naam: <APNI COACHING KA NAAM>
-Courses: SSC CGL, CHSL, MTS, GD, CPO
-Batch timing: <TIMING>
-Fees: <FEES>
-Address: <ADDRESS>
+Coaching ka naam: HARENDRA CLASSESS JAIPUR
+Courses: SSC CGL, CHSL, MTS, GD
+Batch timing: MORNING 9 TO 12 AND EVENING 3 TO 6
+Fees: ₹12,000 FOR ONE YEAR
+Address: JAIPUR
 Contact: <PHONE NUMBER>
 Demo class: <DETAILS>
 """
